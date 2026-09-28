@@ -678,3 +678,7 @@ uv run pytest -q
 uv run ruff check src tests
 ```
 
+## License
+
+[MIT](LICENSE). The software comes with no warranty: you use it, including the
+force feedback, at your own risk.
