@@ -1,0 +1,21 @@
+:root {
+  --bg: #0c0a1c; --bg-2: #15122b; --line: #2b2647; --ink: #f2efe8; --ink-dim: #a9a3c2;
+  --sun: #ff7a45; --cyan: #34e5ff; --magenta: #ff3fa4; --amber: #ffc844; --red: #ff4d4d; --green: #5cff8a;
+  --violet: #b48cff; --blue: #7fa8ff;
+  --cond: "Barlow Condensed", "Roboto Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: Barlow, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-variant-numeric: tabular-nums; overflow: hidden; }
+.cond { font-family: var(--cond); font-weight: 700; letter-spacing: 0.02em; }
+.dim { color: var(--ink-dim); }
+#waiting { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1vh; background: rgba(12, 10, 28, 0.92); z-index: 10; text-align: center; transition: opacity 0.3s; }
+#waiting.hide { opacity: 0; pointer-events: none; }
+#waiting b { font-family: var(--cond); font-size: clamp(28px, 7vmin, 72px); text-transform: uppercase; letter-spacing: 0.06em; }
+#waiting span { color: var(--ink-dim); font-size: clamp(14px, 2.6vmin, 24px); }
+#waiting i { width: 2.4vmin; height: 2.4vmin; min-width: 12px; min-height: 12px; border-radius: 50%; background: var(--sun);
+  animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.2; transform: scale(0.7); } }

@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+charts/*.mp3
+charts/*.ogg
+charts/*.wav
+charts/*.flac
+.pytest_cache/
+.ruff_cache/

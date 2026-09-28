@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Torque Hero top</title>
+<link rel="stylesheet" href="/common.css">
+<style>
+  canvas { display: block; width: 100vw; height: 100vh; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="waiting"><i></i><b>Waiting for the game</b><span>Start Torque Hero. This page connects on its own.</span></div>
+<script src="/common.js"></script>
+<script>
+'use strict';
+// Laid out on a 1920x1080 design grid, scaled to the window.
+const W = 1920, H = 1080;
+const cv = document.getElementById('c'), screenCtx = cv.getContext('2d');
+// Timeline and mixer go to an offscreen layer, redrawn only when they change.
+const layer = document.createElement('canvas'), layerCtx = layer.getContext('2d');
+let ctx = screenCtx, layerKey = '';
+const HISTORY = 600;             // samples kept for the lever and torque trails
+const css = getComputedStyle(document.documentElement);
+const C = Object.fromEntries(['bg', 'bg-2', 'line', 'ink', 'ink-dim', 'sun', 'red', 'green', 'amber', 'cyan'].map((k) => [k, css.getPropertyValue('--' + k).trim()]));
+const COND = css.getPropertyValue('--cond'), BODY = css.getPropertyValue('--body');
+const font = (px, w = 700, fam = COND) => `${w} ${px}px ${fam}`;
+
+let song = null, snap = null;
+let results = new Map();        // note index -> result ("done" for unjudged listen gates), whole song
+let resultsVer = 0;
+let levers = [];                // [{t, v0, v1}] recent lever positions
+let torque = [];                // [{t, v}] recent FFB torque
+let lastNow = -1;
+
+function reset() {
+  results = new Map(Object.entries((song && song.results) || {}).map(([k, v]) => [Number(k), v]));
+  resultsVer++; levers = []; torque = []; lastNow = -1;
+}
+
+function applyState(s) {
+  snap = s;
+  if (!s) return;
+  if (s.now < lastNow - 0.5) { if (song) song.results = {}; reset(); }   // song restarted
+  for (const v of s.notes || []) {
+    const r = v.result || 'done';
+    if (v.done && results.get(v.index) !== r) { results.set(v.index, r); resultsVer++; }
+  }
+  if (s.now === lastNow) return;       // paused, results, attract: nothing new to plot
+  lastNow = s.now;
+  levers.push({ t: s.now, v0: s.input.lever0, v1: s.input.lever1 });
+  torque.push({ t: s.now, v: (s.ffb && s.ffb.torque) || 0 });
+  const cut = s.now - 10;
+  while (levers.length && (levers[0].t < cut || levers.length > HISTORY)) levers.shift();
+  while (torque.length && (torque[0].t < cut || torque.length > HISTORY)) torque.shift();
+}
+
+function fit() {
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = layer.width = Math.round(innerWidth * dpr); cv.height = layer.height = Math.round(innerHeight * dpr);
+  layerKey = '';
+}
+addEventListener('resize', fit); fit();
+
+function panel(x, y, w, h, title) {
+  ctx.fillStyle = C['bg-2']; ctx.strokeStyle = C.line; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, 12); ctx.fill(); ctx.stroke();
+  if (title) { ctx.fillStyle = C['ink-dim']; ctx.font = font(24); ctx.textBaseline = 'top'; ctx.fillText(title.toUpperCase(), x + 20, y + 14); }
+}
+
+function header(now) {
+  const info = song && song.info;
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = C.ink; ctx.font = font(52);
+  ctx.fillText(info ? info.title : 'Torque Hero', 40, 70);
+  const tw = ctx.measureText(info ? info.title : 'Torque Hero').width;
+  ctx.fillStyle = C['ink-dim']; ctx.font = font(30, 500);
+  if (info && info.artist) ctx.fillText(info.artist, 40 + tw + 24, 70);
+  ctx.textAlign = 'right';
+  ctx.fillStyle = C.ink; ctx.font = font(44);
+  ctx.fillText(`${TH.fmtTime(now)} / ${TH.fmtTime(snap.length)}`, W - 40, 68);
+  ctx.fillStyle = C.sun;
+  ctx.fillText(`${snap.score.toLocaleString('en-US')}  ×${snap.multiplier}`, W - 380, 68);
+  ctx.fillStyle = C.amber; ctx.font = font(32);
+  const label = snap.phase === 'play' ? (snap.section || '').toUpperCase() : snap.phase.toUpperCase();
+  ctx.fillText(label + (snap.echo !== 'none' ? `  ·  ECHO ${snap.echo.toUpperCase()}` : ''), W - 820, 66);
+  ctx.textAlign = 'left';
+}
+
+const TL = { x: 30, y: 100, w: W - 60, h: 290 };
+function timelineX(t) {
+  const len = snap.length || (song && song.info.length) || 1;
+  return TL.x + 20 + (TL.w - 40) * Math.min(1, Math.max(0, t / len));
+}
+
+function timeline() {
+  const { x, y, w, h } = TL;
+  panel(x, y, w, h, 'Timeline');
+  const len = snap.length || (song && song.info.length) || 1;
+  const tx = (t) => x + 20 + (w - 40) * Math.min(1, Math.max(0, t / len));
+  const top = y + 52, secH = 44, rowsY = top + secH + 8, rowsH = h - (rowsY - y) - 16;
+  const secs = (song && song.info.sections) || [];
+  secs.forEach((s, i) => {
+    const x0 = tx(s.t), x1 = tx(i + 1 < secs.length ? secs[i + 1].t : len);
+    ctx.fillStyle = `rgba(255,122,69,${0.12 + 0.5 * s.weight})`;
+    ctx.fillRect(x0 + 1, top, x1 - x0 - 2, secH);
+    ctx.save(); ctx.beginPath(); ctx.rect(x0, top, x1 - x0, secH); ctx.clip();
+    ctx.fillStyle = C.ink; ctx.font = font(24); ctx.textBaseline = 'middle';
+    ctx.fillText(s.name.toUpperCase(), x0 + 10, top + secH / 2);
+    ctx.restore();
+  });
+  const layers = (song && song.info.layers_used.length) ? song.info.layers_used : TH.ORDER;
+  const rowH = rowsH / layers.length;
+  layers.forEach((k, r) => {
+    const ry = rowsY + r * rowH;
+    ctx.fillStyle = r % 2 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.045)';
+    ctx.fillRect(x + 20, ry, w - 40, rowH);
+  });
+  const notes = (song && song.chart.notes) || [];
+  notes.forEach((n, i) => {
+    const r = layers.indexOf(n.layer);
+    if (r < 0) return;
+    const ry = rowsY + r * rowH + 3, rh = rowH - 6, res = results.get(i);
+    const col = TH.LAYERS[n.layer].col;
+    ctx.globalAlpha = res ? 0.35 : 1;
+    ctx.fillStyle = res === 'miss' ? C.red : col;
+    const x0 = tx(n.t), x1 = n.dur ? tx(n.t + n.dur) : x0 + 3;
+    ctx.fillRect(x0, ry, Math.max(3, x1 - x0), rh);
+    ctx.globalAlpha = 1;
+  });
+}
+
+function playhead(now) {
+  const px = timelineX(now), top = TL.y + 52, bottom = TL.y + TL.h - 16;
+  ctx.fillStyle = C.ink; ctx.fillRect(px - 2, top - 6, 4, bottom - top + 6);
+  ctx.beginPath(); ctx.moveTo(px - 10, top - 14); ctx.lineTo(px + 10, top - 14); ctx.lineTo(px, top - 2); ctx.fill();
+}
+
+function mixer(x, y, w, h) {
+  panel(x, y, w, h, 'Layer mixer');
+  const rowH = (h - 70) / TH.ORDER.length;
+  const used = song ? new Set(song.info.layers_used) : null;
+  TH.ORDER.forEach((k, i) => {
+    const L = snap.layers[k] || {}, meta = TH.LAYERS[k], ry = y + 60 + i * rowH, cy = ry + rowH / 2;
+    ctx.globalAlpha = used && !used.has(k) ? 0.35 : 1;
+    ctx.fillStyle = meta.col; ctx.fillRect(x + 20, ry + 10, 8, rowH - 20);
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = C.ink; ctx.font = font(36); ctx.fillText(meta.name, x + 44, cy - 12);
+    ctx.fillStyle = C['ink-dim']; ctx.font = font(22, 500, BODY); ctx.fillText(meta.ctrl, x + 44, cy + 20);
+    const auto = L.mode === 'auto';
+    ctx.strokeStyle = auto ? C['ink-dim'] : meta.col; ctx.lineWidth = 2;
+    ctx.fillStyle = auto ? 'transparent' : meta.col;
+    ctx.beginPath(); ctx.roundRect(x + 230, cy - 20, 96, 40, 20); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = auto ? C['ink-dim'] : C.bg; ctx.font = font(24); ctx.textAlign = 'center';
+    ctx.fillText(auto ? 'AUTO' : 'YOU', x + 278, cy + 1);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = auto ? C.line : L.alive ? C.green : C.red;
+    ctx.beginPath(); ctx.arc(x + 362, cy, 13, 0, Math.PI * 2); ctx.fill();
+    const acc = L.total ? L.hit / L.total : null;
+    const bx = x + 400, bw = w - 420 - 150;
+    ctx.fillStyle = C.line; ctx.fillRect(bx, cy - 8, bw, 16);
+    if (acc !== null) { ctx.fillStyle = meta.col; ctx.fillRect(bx, cy - 8, bw * acc, 16); }
+    ctx.fillStyle = C.ink; ctx.font = font(30); ctx.textAlign = 'right';
+    ctx.fillText(auto ? '—' : acc === null ? '·' : `${Math.round(acc * 100)}%`, x + w - 90, cy);
+    ctx.fillStyle = C['ink-dim']; ctx.font = font(22, 500);
+    ctx.fillText(auto ? '' : `${L.hit}/${L.total}`, x + w - 20, cy);
+    ctx.textAlign = 'left'; ctx.globalAlpha = 1;
+  });
+}
+
+function faders(now, x, y, w, h) {
+  panel(x, y, w, h, 'Faders');
+  const BEHIND = 3, AHEAD = 6, lx = x + 20, lw = w - 40;
+  const tx = (t) => lx + lw * (t - (now - BEHIND)) / (BEHIND + AHEAD);
+  const laneH = (h - 80) / 2;
+  const notes = (song && song.chart.notes) || [];
+  [0, 1].forEach((lever) => {
+    const ly = y + 60 + lever * (laneH + 10), vy = (v) => ly + laneH - 8 - (laneH - 16) * Math.min(1, Math.max(0, v));
+    ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fillRect(lx, ly, lw, laneH);
+    ctx.fillStyle = C['ink-dim']; ctx.font = font(22); ctx.textBaseline = 'top';
+    ctx.fillText(lever ? 'LEVER 2 · CUTOFF' : 'LEVER 1 · LEVEL', lx + 10, ly + 8);
+    ctx.save(); ctx.beginPath(); ctx.rect(lx, ly, lw, laneH); ctx.clip();
+    ctx.strokeStyle = TH.LAYERS.faders.col; ctx.lineWidth = 5; ctx.lineJoin = 'round';
+    notes.forEach((n) => {
+      if (n.kind !== 'fader' || n.lever !== lever || n.t + n.dur < now - BEHIND || n.t > now + AHEAD) return;
+      ctx.globalAlpha = 0.18; ctx.fillStyle = TH.LAYERS.faders.col;
+      ctx.fillRect(tx(n.t), ly, tx(n.t + n.dur) - tx(n.t), laneH);
+      ctx.globalAlpha = 1; ctx.beginPath();
+      n.curve.forEach(([dt, v], j) => (j ? ctx.lineTo : ctx.moveTo).call(ctx, tx(n.t + dt), vy(v)));
+      ctx.stroke();
+    });
+    ctx.strokeStyle = C.sun; ctx.lineWidth = 4; ctx.beginPath();
+    levers.forEach((p, j) => (j ? ctx.lineTo : ctx.moveTo).call(ctx, tx(p.t), vy(lever ? p.v1 : p.v0)));
+    ctx.stroke();
+    ctx.restore();
+    const nx = tx(now);
+    ctx.fillStyle = 'rgba(242,239,232,0.6)'; ctx.fillRect(nx - 1, ly, 2, laneH);
+    const target = snap.fader_targets[lever];
+    if (target !== null && target !== undefined) {
+      ctx.strokeStyle = TH.LAYERS.faders.col; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(nx, vy(target), 16, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.fillStyle = C.sun; ctx.beginPath(); ctx.arc(nx, vy(snap.input['lever' + lever]), 10, 0, Math.PI * 2); ctx.fill();
+  });
+}
+
+function ffb(now, x, y, w, h) {
+  panel(x, y, w, h, 'Force feedback');
+  const f = snap.ffb || { torque: 0, log: [] }, t = Math.max(-1, Math.min(1, f.torque || 0));
+  const bx = x + 20, by = y + 60, bw = 520, bh = 40, cx = bx + bw / 2;
+  ctx.fillStyle = C.line; ctx.fillRect(bx, by, bw, bh);
+  ctx.fillStyle = Math.abs(t) > 0.8 ? C.red : C.cyan;
+  ctx.fillRect(t < 0 ? cx + t * bw / 2 : cx, by, Math.abs(t) * bw / 2, bh);
+  ctx.fillStyle = C.ink; ctx.fillRect(cx - 1, by - 6, 2, bh + 12);
+  ctx.font = font(28); ctx.textBaseline = 'top';
+  ctx.fillText(`TORQUE ${t >= 0 ? '+' : ''}${t.toFixed(2)}`, bx, by + bh + 12);
+  const sy = by + bh + 60, sh = h - (sy - y) - 20;
+  ctx.strokeStyle = C.line; ctx.strokeRect(bx, sy, bw, sh);
+  ctx.strokeStyle = C.cyan; ctx.lineWidth = 3; ctx.beginPath();
+  torque.forEach((p, j) => (j ? ctx.lineTo : ctx.moveTo).call(ctx, bx + bw * (1 - (now - p.t) / 10), sy + sh / 2 - p.v * sh / 2));
+  ctx.stroke();
+  const lx = bx + bw + 40;
+  ctx.font = font(26, 500);
+  (f.log || []).slice(0, Math.floor((h - 70) / 36)).forEach((line, i) => {
+    ctx.fillStyle = i ? C['ink-dim'] : C.ink;
+    ctx.fillText(String(line), lx, y + 60 + i * 36);
+  });
+}
+
+function drawLayer() {
+  const key = [resultsVer, snap.length, song ? song.info.title : '', JSON.stringify(snap.layers)].join('|');
+  if (key === layerKey) return;
+  layerKey = key;
+  ctx = layerCtx;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, layer.width, layer.height);
+  ctx.setTransform(layer.width / W, 0, 0, layer.height / H, 0, 0);
+  timeline();
+  mixer(30, 410, 760, 640);
+  ctx = screenCtx;
+}
+
+let lastDraw = 0;
+function frame(ts) {
+  requestAnimationFrame(frame);
+  if (ts - lastDraw < 30) return;      // about 30 fps is plenty for a 20 Hz stream
+  lastDraw = ts;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, cv.width, cv.height);
+  if (!snap) return;
+  drawLayer();
+  ctx.drawImage(layer, 0, 0);
+  ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
+  const now = TH.clock(snap);
+  header(now);
+  playhead(now);
+  faders(now, 810, 410, W - 840, 380);
+  ffb(now, 810, 810, W - 840, 240);
+}
+
+TH.connect({
+  onSong: (sg) => { song = sg && sg.info ? sg : null; reset(); layerKey = ''; },
+  onState: applyState,
+});
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

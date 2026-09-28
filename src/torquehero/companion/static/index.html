@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Torque Hero companion</title>
+<link rel="stylesheet" href="/common.css">
+<style>
+  body { overflow: auto; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px; }
+  h1 { font-family: var(--cond); font-size: 44px; margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+  h1 span { color: var(--sun); }
+  h2 { font-family: var(--cond); font-size: 22px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-dim); margin: 28px 0 10px; }
+  a { color: var(--cyan); }
+  .page { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px;
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 10px; text-decoration: none; color: var(--ink); }
+  .page b { font-family: var(--cond); font-size: 26px; color: var(--cyan); }
+  .page span { color: var(--ink-dim); }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .url { display: block; font-size: 18px; padding: 8px 12px; background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: 6px; margin-bottom: 6px; overflow-wrap: anywhere; }
+  #status i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--ink-dim); margin-right: 8px; }
+  #status.live i { background: var(--green); }
+  p { color: var(--ink-dim); line-height: 1.5; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Torque <span>Hero</span> companion</h1>
+  <div id="status"><i></i><span>Checking for the game…</span></div>
+  <h2>Pages</h2>
+  <div id="pages"></div>
+  <h2>Open on another device</h2>
+  <div id="urls"></div>
+  <p>Open a page in a browser on the extra screen, full screen or kiosk mode
+     (for example <code>chrome --kiosk http://HOST:PORT/dash</code>).
+     Pages reconnect on their own when the game restarts.</p>
+</main>
+<script>
+'use strict';
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+fetch('/info').then((r) => r.json()).then((info) => {
+  document.getElementById('pages').innerHTML = info.pages.map((p) =>
+    `<a class="page" href="${esc(p.path)}"><b>${esc(p.path)}</b><span>${esc(p.title)}</span></a>`).join('');
+  document.getElementById('urls').innerHTML = info.urls.flatMap((u) =>
+    info.pages.map((p) => `<code class="url">${esc(u + p.path)}</code>`)).join('');
+});
+const poll = () => fetch('/state').then((r) => r.json()).then((s) => {
+  const el = document.getElementById('status');
+  el.classList.toggle('live', !!s);
+  el.querySelector('span').textContent = s ? `Game connected: ${s.phase}` : 'No game data yet';
+}).catch(() => {
+  document.getElementById('status').classList.remove('live');
+  document.querySelector('#status span').textContent = 'Server not reachable';
+});
+poll(); setInterval(poll, 2000);
+</script>
+</body>
+</html>

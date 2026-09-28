@@ -1,0 +1,552 @@
+{
+ "format": 1,
+ "title": "Torque Hero preview",
+ "artist": "Café Señor — sample",
+ "bpm": 120.0,
+ "length": 24.0,
+ "sections": [
+  {
+   "t": 0.0,
+   "name": "intro",
+   "weight": 0.2
+  },
+  {
+   "t": 4.0,
+   "name": "verse",
+   "weight": 0.6
+  },
+  {
+   "t": 8.0,
+   "name": "echo",
+   "weight": 0.3
+  },
+  {
+   "t": 12.0,
+   "name": "chorus",
+   "weight": 0.9
+  },
+  {
+   "t": 20.5,
+   "name": "drop",
+   "weight": 1.0
+  }
+ ],
+ "beats": [
+  {
+   "t": 0.0,
+   "s": 1.0
+  },
+  {
+   "t": 0.5,
+   "s": 0.5
+  },
+  {
+   "t": 1.0,
+   "s": 0.5
+  },
+  {
+   "t": 1.5,
+   "s": 0.5
+  },
+  {
+   "t": 2.0,
+   "s": 1.0
+  },
+  {
+   "t": 2.5,
+   "s": 0.5
+  },
+  {
+   "t": 3.0,
+   "s": 0.5
+  },
+  {
+   "t": 3.5,
+   "s": 0.5
+  },
+  {
+   "t": 4.0,
+   "s": 1.0
+  },
+  {
+   "t": 4.5,
+   "s": 0.5
+  },
+  {
+   "t": 5.0,
+   "s": 0.5
+  },
+  {
+   "t": 5.5,
+   "s": 0.5
+  },
+  {
+   "t": 6.0,
+   "s": 1.0
+  },
+  {
+   "t": 6.5,
+   "s": 0.5
+  },
+  {
+   "t": 7.0,
+   "s": 0.5
+  },
+  {
+   "t": 7.5,
+   "s": 0.5
+  },
+  {
+   "t": 8.0,
+   "s": 1.0
+  },
+  {
+   "t": 8.5,
+   "s": 0.5
+  },
+  {
+   "t": 9.0,
+   "s": 0.5
+  },
+  {
+   "t": 9.5,
+   "s": 0.5
+  },
+  {
+   "t": 10.0,
+   "s": 1.0
+  },
+  {
+   "t": 10.5,
+   "s": 0.5
+  },
+  {
+   "t": 11.0,
+   "s": 0.5
+  },
+  {
+   "t": 11.5,
+   "s": 0.5
+  },
+  {
+   "t": 12.0,
+   "s": 1.0
+  },
+  {
+   "t": 12.5,
+   "s": 0.5
+  },
+  {
+   "t": 13.0,
+   "s": 0.5
+  },
+  {
+   "t": 13.5,
+   "s": 0.5
+  },
+  {
+   "t": 14.0,
+   "s": 1.0
+  },
+  {
+   "t": 14.5,
+   "s": 0.5
+  },
+  {
+   "t": 15.0,
+   "s": 0.5
+  },
+  {
+   "t": 15.5,
+   "s": 0.5
+  },
+  {
+   "t": 16.0,
+   "s": 1.0
+  },
+  {
+   "t": 16.5,
+   "s": 0.5
+  },
+  {
+   "t": 17.0,
+   "s": 0.5
+  },
+  {
+   "t": 17.5,
+   "s": 0.5
+  },
+  {
+   "t": 18.0,
+   "s": 1.0
+  },
+  {
+   "t": 18.5,
+   "s": 0.5
+  },
+  {
+   "t": 19.0,
+   "s": 0.5
+  },
+  {
+   "t": 19.5,
+   "s": 0.5
+  },
+  {
+   "t": 20.0,
+   "s": 1.0
+  },
+  {
+   "t": 20.5,
+   "s": 0.5
+  },
+  {
+   "t": 21.0,
+   "s": 0.5
+  },
+  {
+   "t": 21.5,
+   "s": 0.5
+  },
+  {
+   "t": 22.0,
+   "s": 1.0
+  },
+  {
+   "t": 22.5,
+   "s": 0.5
+  },
+  {
+   "t": 23.0,
+   "s": 0.5
+  },
+  {
+   "t": 23.5,
+   "s": 0.5
+  }
+ ],
+ "road": [
+  {
+   "t": 0.0,
+   "x": 0.0
+  },
+  {
+   "t": 1.0,
+   "x": 0.0
+  },
+  {
+   "t": 2.0,
+   "x": 0.5
+  },
+  {
+   "t": 3.0,
+   "x": -0.5
+  },
+  {
+   "t": 8.0,
+   "x": 0.0
+  },
+  {
+   "t": 8.5,
+   "x": 0.3
+  },
+  {
+   "t": 9.0,
+   "x": 0.0
+  },
+  {
+   "t": 10.0,
+   "x": 0.0
+  },
+  {
+   "t": 10.5,
+   "x": -0.35
+  },
+  {
+   "t": 11.0,
+   "x": 0.0
+  },
+  {
+   "t": 12.0,
+   "x": 0.0
+  },
+  {
+   "t": 15.0,
+   "x": 0.4
+  },
+  {
+   "t": 17.5,
+   "x": 0.0
+  }
+ ],
+ "notes": [
+  {
+   "t": 1.0,
+   "kind": "gate",
+   "layer": "melody",
+   "x": 0.0
+  },
+  {
+   "t": 2.0,
+   "kind": "gate",
+   "layer": "melody",
+   "x": 0.5
+  },
+  {
+   "t": 3.0,
+   "kind": "gate",
+   "layer": "melody",
+   "x": -0.5
+  },
+  {
+   "t": 4.0,
+   "kind": "kick",
+   "layer": "kick",
+   "vel": 1.0
+  },
+  {
+   "t": 4.5,
+   "kind": "hat",
+   "layer": "hat"
+  },
+  {
+   "t": 5.0,
+   "kind": "kick",
+   "layer": "kick",
+   "vel": 0.8
+  },
+  {
+   "t": 5.5,
+   "kind": "hat",
+   "layer": "hat",
+   "open": true
+  },
+  {
+   "t": 6.0,
+   "kind": "expr",
+   "layer": "expr",
+   "dur": 2.0,
+   "curve": [
+    [
+     0.0,
+     0.2
+    ],
+    [
+     1.0,
+     0.8
+    ],
+    [
+     2.0,
+     0.5
+    ]
+   ]
+  },
+  {
+   "t": 8.0,
+   "kind": "gate",
+   "layer": "melody",
+   "x": 0.0,
+   "listen": true
+  },
+  {
+   "t": 8.5,
+   "kind": "gate",
+   "layer": "melody",
+   "x": 0.3,
+   "listen": true
+  },
+  {
+   "t": 9.0,
+   "kind": "gate",
+   "layer": "melody",
+   "x": 0.0,
+   "listen": true
+  },
+  {
+   "t": 9.6,
+   "kind": "fader",
+   "layer": "faders",
+   "dur": 1.6,
+   "lever": 0,
+   "curve": [
+    [
+     0.0,
+     0.2
+    ],
+    [
+     1.6,
+     0.8
+    ]
+   ]
+  },
+  {
+   "t": 9.75,
+   "kind": "kick",
+   "layer": "kick"
+  },
+  {
+   "t": 10.0,
+   "kind": "gate",
+   "layer": "melody",
+   "x": 0.0,
+   "blind": true
+  },
+  {
+   "t": 10.25,
+   "kind": "hat",
+   "layer": "hat"
+  },
+  {
+   "t": 10.5,
+   "kind": "gate",
+   "layer": "melody",
+   "x": -0.35,
+   "blind": true
+  },
+  {
+   "t": 10.5,
+   "kind": "stab",
+   "layer": "pads",
+   "gate": 2
+  },
+  {
+   "t": 10.75,
+   "kind": "kick",
+   "layer": "kick"
+  },
+  {
+   "t": 11.0,
+   "kind": "gate",
+   "layer": "melody",
+   "x": 0.0,
+   "blind": true
+  },
+  {
+   "t": 11.0,
+   "kind": "hat",
+   "layer": "hat"
+  },
+  {
+   "t": 12.5,
+   "kind": "stab",
+   "layer": "pads",
+   "gate": 1
+  },
+  {
+   "t": 13.5,
+   "kind": "stab",
+   "layer": "pads",
+   "gate": 3
+  },
+  {
+   "t": 14.0,
+   "kind": "fader",
+   "layer": "faders",
+   "dur": 2.0,
+   "lever": 1,
+   "curve": [
+    [
+     0.0,
+     0.3
+    ],
+    [
+     2.0,
+     0.7
+    ]
+   ]
+  },
+  {
+   "t": 16.5,
+   "kind": "tom",
+   "layer": "fills",
+   "side": "L"
+  },
+  {
+   "t": 17.0,
+   "kind": "tom",
+   "layer": "fills",
+   "side": "R"
+  },
+  {
+   "t": 18.0,
+   "kind": "spin",
+   "layer": "melody",
+   "dur": 1.6,
+   "dir": "cw"
+  },
+  {
+   "t": 20.4,
+   "kind": "spin",
+   "layer": "melody",
+   "dur": 1.6,
+   "dir": "ccw"
+  },
+  {
+   "t": 22.4,
+   "kind": "riser",
+   "layer": "riser",
+   "dur": 1.5
+  }
+ ],
+ "audio": {
+  "sr": 48000,
+  "backing": [
+   "stems/backing.wav"
+  ],
+  "stems": {
+   "lead": "stems/lead.wav",
+   "pad": "stems/pad.wav",
+   "bass": "stems/bass.wav",
+   "drums": "stems/drums.wav"
+  },
+  "oneshots": {
+   "kick": "oneshots/kick.wav",
+   "hat": "oneshots/hat.wav",
+   "tom_l": "oneshots/tom_l.wav",
+   "tom_r": "oneshots/tom_r.wav",
+   "riser": "oneshots/riser.wav",
+   "impact": "oneshots/impact.wav",
+   "dud": "oneshots/dud.wav",
+   "stab1": "oneshots/stab1.wav",
+   "stab2": "oneshots/stab2.wav",
+   "stab3": "oneshots/stab3.wav",
+   "stab4": "oneshots/stab4.wav",
+   "stab5": "oneshots/stab5.wav",
+   "stab6": "oneshots/stab6.wav"
+  },
+  "layers": {
+   "melody": {
+    "stem": "lead",
+    "mode": "filter"
+   },
+   "expr": {
+    "stem": "pad",
+    "mode": "level"
+   },
+   "faders": {
+    "stem": "bass",
+    "mode": "levers"
+   },
+   "kick": {
+    "oneshot": "kick",
+    "mode": "trigger"
+   },
+   "hat": {
+    "oneshot": "hat",
+    "mode": "trigger"
+   },
+   "pads": {
+    "oneshot": "stab{gate}",
+    "mode": "trigger"
+   },
+   "fills": {
+    "oneshot": "tom_{side}",
+    "mode": "trigger"
+   },
+   "riser": {
+    "oneshot": "riser",
+    "mode": "riser"
+   }
+  }
+ }
+}

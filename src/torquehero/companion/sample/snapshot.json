@@ -1,0 +1,204 @@
+{
+ "phase": "play",
+ "now": 8.3,
+ "length": 24.0,
+ "score": 800,
+ "combo": 8,
+ "max_combo": 8,
+ "multiplier": 1,
+ "accuracy": 1.0,
+ "counts": {
+  "perfect": 8,
+  "good": 0,
+  "miss": 0
+ },
+ "layers": {
+  "melody": {
+   "mode": "you",
+   "alive": true,
+   "hit": 3,
+   "total": 3
+  },
+  "kick": {
+   "mode": "you",
+   "alive": true,
+   "hit": 2,
+   "total": 2
+  },
+  "hat": {
+   "mode": "you",
+   "alive": true,
+   "hit": 2,
+   "total": 2
+  },
+  "expr": {
+   "mode": "you",
+   "alive": true,
+   "hit": 1,
+   "total": 1
+  },
+  "pads": {
+   "mode": "auto",
+   "alive": true,
+   "hit": 0,
+   "total": 0
+  },
+  "fills": {
+   "mode": "auto",
+   "alive": true,
+   "hit": 0,
+   "total": 0
+  },
+  "riser": {
+   "mode": "auto",
+   "alive": true,
+   "hit": 0,
+   "total": 0
+  },
+  "faders": {
+   "mode": "auto",
+   "alive": true,
+   "hit": 0,
+   "total": 0
+  }
+ },
+ "input": {
+  "steer": 0.010288065843621942,
+  "steer_deg": 0.9259259259259748,
+  "brake": 0.0,
+  "clutch": 0.0,
+  "throttle": 0.0,
+  "handbrake": 0.0,
+  "lever0": 0.0,
+  "lever1": 0.0,
+  "down": [],
+  "pressed": [],
+  "released": [],
+  "system": [],
+  "bound": [
+   "brake",
+   "clutch",
+   "steer"
+  ],
+  "fallback": [
+   "throttle"
+  ],
+  "velocity": {}
+ },
+ "section": "echo",
+ "weight": 0.3,
+ "beat_phase": 0.6000000000000014,
+ "beat_strength": 1.0,
+ "road_x": 0.010288065843621942,
+ "on_road": true,
+ "echo": "listen",
+ "echo_target": 0.1944000000000006,
+ "riser": {
+  "active": false,
+  "progress": 0.0,
+  "held": false,
+  "held_frac": 0.0
+ },
+ "expr_target": null,
+ "fader_targets": [
+  null,
+  null
+ ],
+ "upcoming": [
+  {
+   "t": 12.0,
+   "kind": "stab",
+   "layer": "pads",
+   "gate": 1,
+   "index": 14
+  },
+  {
+   "t": 12.0,
+   "kind": "fader",
+   "layer": "faders",
+   "dur": 2.0,
+   "lever": 0,
+   "index": 15
+  },
+  {
+   "t": 13.0,
+   "kind": "stab",
+   "layer": "pads",
+   "gate": 3,
+   "index": 16
+  },
+  {
+   "t": 14.5,
+   "kind": "fader",
+   "layer": "faders",
+   "dur": 1.0,
+   "lever": 1,
+   "index": 17
+  },
+  {
+   "t": 16.0,
+   "kind": "tom",
+   "layer": "fills",
+   "side": "L",
+   "index": 18
+  }
+ ],
+ "notes": [
+  {
+   "index": 7,
+   "done": true,
+   "result": "perfect",
+   "progress": 1.0
+  },
+  {
+   "index": 8,
+   "done": true,
+   "result": null,
+   "progress": null
+  },
+  {
+   "index": 9,
+   "done": false,
+   "result": null,
+   "progress": null
+  },
+  {
+   "index": 10,
+   "done": false,
+   "result": null,
+   "progress": null
+  },
+  {
+   "index": 11,
+   "done": false,
+   "result": null,
+   "progress": null
+  },
+  {
+   "index": 12,
+   "done": false,
+   "result": null,
+   "progress": null
+  }
+ ],
+ "popups": [
+  {
+   "text": "PERFECT",
+   "layer": "expr",
+   "x": -1.35,
+   "t0": 8.016666666666667
+  }
+ ],
+ "ffb": {
+  "torque": 0.35,
+  "log": [
+   "ECHO spring centre -> 0 deg",
+   "WEIGHT 30%"
+  ]
+ },
+ "steer_offset_deg": 0.0,
+ "steer_lane": 0.010288065843621942,
+ "steer_unwind": false,
+ "steer_offset_changed": false,
+ "steer_lane_jump": false
+}

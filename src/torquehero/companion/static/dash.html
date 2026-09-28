@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Torque Hero dash</title>
+<link rel="stylesheet" href="/common.css">
+<style>
+  /* Designed for 800x480 at arm's length; everything scales with the viewport. */
+  body { display: grid; grid-template-rows: 1fr auto auto; gap: 2.5vh; padding: 3vh 3vw; }
+  #flash { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 1.2vmin var(--sun); opacity: 0; }
+  .top { display: grid; grid-template-columns: 1.3fr 1fr; gap: 3vw; align-items: center; min-height: 0; }
+  .combo { text-align: center; line-height: 0.9; }
+  .combo b { display: block; font-family: var(--cond); font-size: 30vh; font-weight: 700; }
+  .combo span, .lab { font-family: var(--cond); font-size: 4.2vh; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-dim); }
+  .side { display: flex; flex-direction: column; gap: 2vh; }
+  .mult { font-family: var(--cond); font-size: 17vh; font-weight: 700; line-height: 0.9; color: var(--sun); }
+  .mult small { font-size: 0.5em; }
+  .score { font-family: var(--cond); font-size: 9vh; font-weight: 700; line-height: 1; }
+  .turn { font-family: var(--cond); font-size: 5vh; font-weight: 700; color: var(--bg); background: var(--cyan);
+    border-radius: 1vh; padding: 0.2vh 1.2vw; align-self: flex-start; }
+  .turn[hidden] { display: none; }
+  #unwind { position: fixed; left: 3vw; right: 3vw; top: 50%; transform: translateY(-50%); z-index: 5;
+    text-align: center; font-family: var(--cond); font-weight: 700; font-size: 16vh; line-height: 1.1; color: var(--bg);
+    background: var(--amber); border-radius: 2vh; padding: 2vh 0; box-shadow: 0 0 6vh rgba(255, 200, 68, 0.6); }
+  #unwind small { display: block; font-size: 0.32em; letter-spacing: 0.08em; }
+  #unwind[hidden] { display: none; }
+  .phase { font-family: var(--cond); font-size: 4.5vh; text-transform: uppercase; letter-spacing: 0.1em; color: var(--amber); min-height: 1em; }
+  .lamps { display: grid; grid-template-columns: repeat(8, 1fr); gap: 1.2vw; }
+  .lamp { text-align: center; font-family: var(--cond); font-size: 3.6vh; text-transform: uppercase; color: var(--ink-dim); }
+  .lamp i { display: block; height: 7vh; border-radius: 1vh; border: 0.4vh solid var(--c); margin-bottom: 0.6vh; }
+  .lamp.alive i { background: var(--c); box-shadow: 0 0 2vh var(--c); }
+  .lamp.auto i { background: transparent; border-style: dashed; opacity: 0.55; box-shadow: none; }
+  .lamp.dead i { background: #3a1420; border-color: var(--red); }
+  .lamp.unused { opacity: 0.25; }
+  .next { display: grid; grid-template-columns: auto 1fr auto; gap: 2vw; align-items: center; padding: 1.8vh 2vw;
+    background: var(--bg-2); border: 0.3vh solid var(--line); border-radius: 1.5vh; min-height: 15vh; }
+  .next .sw { width: 3vh; height: 9vh; border-radius: 0.8vh; background: var(--c, var(--line)); }
+  .next b { font-family: var(--cond); font-size: 8vh; line-height: 1; display: block; }
+  .next .cd { font-family: var(--cond); font-size: 10vh; font-weight: 700; line-height: 1; text-align: right; }
+  .bar { height: 1.2vh; margin-top: 1vh; background: var(--line); border-radius: 1vh; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--c, var(--sun)); }
+</style>
+</head>
+<body>
+<div id="flash"></div>
+<section class="top">
+  <div class="combo"><b id="combo">0</b><span>Combo</span></div>
+  <div class="side">
+    <div class="mult cond"><small>×</small><span id="multN">1</span></div>
+    <div><div class="lab">Score</div><div class="score" id="score">0</div></div>
+    <div class="phase" id="phase"></div>
+    <div class="turn" id="turn" hidden></div>
+  </div>
+</section>
+<section class="lamps" id="lamps"></section>
+<section class="next" id="next">
+  <div class="sw"></div>
+  <div><b id="nextName">—</b><span class="lab" id="nextSub">Next special note</span>
+    <div class="bar"><i id="nextBar"></i></div></div>
+  <div class="cd" id="nextCd"></div>
+</section>
+<div id="unwind" hidden><span id="unwindText">TURN BACK</span><small>Wheel and turn offset disagree</small></div>
+<div id="waiting"><i></i><b>Waiting for the game</b><span>Start Torque Hero. This page connects on its own.</span></div>
+<script src="/common.js"></script>
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const lampsEl = $('lamps'), flash = $('flash'), next = $('next');
+const nextName = $('nextName'), nextSub = $('nextSub'), nextCd = $('nextCd'), nextBar = $('nextBar');
+const setBar = (f) => { const w = (f * 100).toFixed(0) + '%'; if (nextBar._w !== w) { nextBar._w = w; nextBar.style.width = w; } };
+const setCol = (c) => { if (next._col !== c) { next._col = c; if (c) next.style.setProperty('--c', c); else next.style.removeProperty('--c'); } };
+const lamps = {};
+for (const k of TH.ORDER) {
+  const el = document.createElement('div');
+  el.className = 'lamp';
+  el.style.setProperty('--c', TH.LAYERS[k].col);
+  el.innerHTML = `<i></i>${TH.LAYERS[k].name}`;
+  lampsEl.appendChild(el);
+  lamps[k] = el;
+}
+let snap = null, used = null, bps = 2;
+const PHASE = { attract: 'Ready', countdown: 'Get ready', paused: 'Paused', calibrate: 'Calibrating', results: 'Results', play: '' };
+
+function applyState(s) {
+  snap = s;
+  if (!s) return;
+  TH.setText($('combo'), s.combo);
+  TH.setText($('multN'), s.multiplier);
+  TH.setText($('score'), s.score.toLocaleString('en-US'));
+  TH.setText($('phase'), s.phase === 'play' ? (s.section || '') : (PHASE[s.phase] ?? s.phase));
+  // SPEC 9 turn offset. Fields arrive with a later foundation change; default when absent.
+  const turn = Math.round(s.steer_offset_deg ?? 0), unwind = s.steer_unwind === true;
+  $('turn').hidden = !turn;
+  TH.setText($('turn'), `TURN ${turn > 0 ? '+' : ''}${turn}°`);
+  $('unwind').hidden = !unwind;  // wheel and turn offset disagree: the player must turn back
+
+  for (const k of TH.ORDER) {
+    const L = s.layers[k] || {};
+    TH.setClass(lamps[k], 'lamp ' + (L.mode === 'auto' ? 'auto' : L.alive ? 'alive' : 'dead') + (used && !used.has(k) ? ' unused' : ''));
+  }
+}
+
+function frame() {
+  requestAnimationFrame(frame);
+  if (!snap) return;
+  const now = TH.clock(snap);
+  const beat = snap.phase === 'play' ? Math.pow(1 - Math.min(1, snap.beat_phase + (now - snap.now) * bps), 3) * (snap.beat_strength || 0) : 0;
+  const op = (beat * 0.9).toFixed(2);
+  if (flash._o !== op) { flash._o = op; flash.style.opacity = op; }
+  const r = snap.riser || {};
+  const n = (snap.upcoming || []).find((u) => u.t >= now - 0.05);
+  if (r.active) {
+    setCol(TH.LAYERS.riser.col);
+    TH.setText(nextName, r.held ? 'Hold…' : 'Pull the handbrake');
+    TH.setText(nextSub, 'Riser: release on the drop');
+    TH.setText(nextCd, '');
+    setBar(r.progress);
+  } else if (n) {
+    const [name, sub] = TH.noteLabel(n), dt = Math.max(0, n.t - now);
+    setCol((TH.LAYERS[n.layer] || {}).col || 'var(--line)');
+    TH.setText(nextName, name);
+    TH.setText(nextSub, sub);
+    TH.setText(nextCd, dt < 0.05 ? 'NOW' : dt.toFixed(1) + 's');
+    setBar(Math.max(0, 1 - dt / 8));
+  } else {
+    setCol(null);
+    TH.setText(nextName, '—');
+    TH.setText(nextSub, 'No special note soon');
+    TH.setText(nextCd, '');
+    setBar(0);
+  }
+}
+
+TH.connect({
+  onSong: (song) => {
+    used = song && song.info ? new Set(song.info.layers_used) : null;
+    bps = song && song.info && song.info.bpm > 0 ? song.info.bpm / 60 : 2;
+    if (snap) applyState(snap); },
+  onState: applyState,
+});
+frame();
+</script>
+</body>
+</html>
